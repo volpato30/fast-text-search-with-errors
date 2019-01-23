@@ -2,11 +2,18 @@ package main
 
 import (
 	"fmt"
-//	"sync"
+	//	"sync"
 	"log"
 )
 
 //var fileMutex sync.Mutex
+
+type Configuration struct {
+	denovoPeptideFilename string
+	fastaFileName         string
+	outputFileName        string
+	batchSize             int
+}
 
 func test_hamming1_search() {
 	pattern := []string{"T", "C", "G", "T"}
@@ -59,5 +66,11 @@ func test_hamming1_search() {
 func main() {
 	test_hamming1_search()
 	fmt.Println("test passed")
-}
+	//config := Configuration{
+	//	denovoPeptideFilename: "denovo.peptide",
+	//	fastaFileName: "HUMAN.FastaRecord",
+	//	outputFileName: "wt_aligned.peptide.txt",
+	//	batchSize: 200,
+	//}
 
+}
