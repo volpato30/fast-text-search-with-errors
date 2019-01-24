@@ -14,7 +14,11 @@ func StringIdentityMap(char string) string {
 }
 
 func IToLMap(char string) string {
-	return char
+	if char == "I" {
+		return "L"
+	} else {
+		return char
+	}
 }
 
 type CharConvert func(string) string
@@ -38,7 +42,7 @@ func HammingDist1Search(pattern []string, text []string, convertFunc CharConvert
 	var mappedChar string
 	mask := 1 << (m - 1)
 
-	sMap := make(map[string] int)
+	sMap := make(map[string]int)
 
 	for index, char := range pattern {
 		mappedChar = convertFunc(char)
@@ -50,7 +54,6 @@ func HammingDist1Search(pattern []string, text []string, convertFunc CharConvert
 		}
 	}
 
-
 	for index, char := range text {
 		mappedChar = convertFunc(char)
 		val, ok := sMap[mappedChar]
@@ -61,12 +64,12 @@ func HammingDist1Search(pattern []string, text []string, convertFunc CharConvert
 		}
 		shR0 = (R0 << 1) | 1
 		R0 = shR0 & S
-		R1 = ( ((R1 << 1) | 1) & S ) | shR0
-		if R0 & mask != 0 {
+		R1 = (((R1 << 1) | 1) & S) | shR0
+		if R0&mask != 0 {
 			matchLoc.exactMatch = true
 			return matchLoc, nil
-		} else if R1 & mask != 0 {
-			matchLoc.startIndex = append(matchLoc.startIndex, uint(index - int(m) + 1))
+		} else if R1&mask != 0 {
+			matchLoc.startIndex = append(matchLoc.startIndex, uint(index-int(m)+1))
 		}
 	}
 	return matchLoc, nil

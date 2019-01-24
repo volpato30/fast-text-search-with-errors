@@ -26,6 +26,10 @@ func (r *FastxReader) next_seq() (record FastaRecord, err error) {
 	if str, err = r.r.ReadString('>'); err == nil {
 		if str, err = r.r.ReadString('>'); err == nil {
 			split_result := strings.SplitN(str, "\n", 2)
+			// end of file without a \n
+			if len(split_result) < 2 {
+				return record, io.EOF
+			}
 			record.header = split_result[0]
 			//remove newlines and trailing >
 			record.sequence = chomp(strings.Replace(split_result[1], "\n", "", -1), ">")
