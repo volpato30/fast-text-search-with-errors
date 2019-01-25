@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Configuration struct {
@@ -70,19 +71,6 @@ func check(e error) {
 	}
 }
 
-func readFastaFile(fileName string) [][]string {
-	var databasePeptides [][]string
-	file, err := os.Open(fileName)
-	check(err)
-	defer file.Close()
-	fastax := NewFastxReader(file)
-	for rec, err := fastax.next_seq(); err == nil; {
-		databasePeptides = append(databasePeptides, strings.Split(rec.sequence, ""))
-		rec, err = fastax.next_seq()
-	}
-	return databasePeptides
-}
-
 func batchProcess(denovoPeptides []string, databasePeptides [][]string, writer *bufio.Writer, mutex *sync.Mutex,
 	wg *sync.WaitGroup) {
 	defer wg.Done()
@@ -134,8 +122,12 @@ func main() {
 		outputFileName:        "wt_aligned.peptide.txt",
 		batchSize:             200,
 	}
-	databasePeptides := readFastaFile(config.fastaFileName)
-	fmt.Printf("read %d proteins", len(databasePeptides))
+	start := time.Now()
+	f, err := os.Open(config.fastaFileName)
+	defer f.Close()
+	check(err)
+	databasePeptides := readFastaFile(f)
+	fmt.Printf("read %d proteins\n", len(databasePeptides))
 	var wg sync.WaitGroup
 	var denovoPeptides []string
 	var mutex sync.Mutex
@@ -164,4 +156,6 @@ func main() {
 		log.Fatal(err)
 	}
 	wg.Wait()
+	elapsed := time.Since(start)
+	log.Printf("took %s", elapsed)
 }

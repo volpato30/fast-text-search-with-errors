@@ -1,47 +1,28 @@
 package main
 
 import (
-	"bufio"
-	"io"
+	"github.com/biogo/biogo/alphabet"
+	"github.com/biogo/biogo/io/seqio"
+	"github.com/biogo/biogo/io/seqio/fasta"
+	"github.com/biogo/biogo/seq/linear"
+	"log"
+	"os"
 	"strings"
 )
 
-type FastaRecord struct {
-	header   string
-	sequence string
-}
-
-func NewFastxReader(f io.Reader) *FastxReader {
-	return &FastxReader{
-		r: bufio.NewReader(f),
+func readFastaFile(f *os.File) [][]string {
+	var result [][]string
+	t := linear.NewSeq("", nil, alphabet.Protein)
+	fastaReader := fasta.NewReader(f, t)
+	sc := seqio.NewScanner(fastaReader)
+	for sc.Next() {
+		s := sc.Seq().(*linear.Seq)
+		temp := strings.Split(s.Seq.String(), "")
+		result = append(result, temp)
 	}
-}
-
-type FastxReader struct {
-	r *bufio.Reader
-}
-
-func (r *FastxReader) next_seq() (record FastaRecord, err error) {
-	var str string
-	if str, err = r.r.ReadString('>'); err == nil {
-		if str, err = r.r.ReadString('>'); err == nil {
-			split_result := strings.SplitN(str, "\n", 2)
-			// end of file without a \n
-			if len(split_result) < 2 {
-				return record, io.EOF
-			}
-			record.header = split_result[0]
-			//remove newlines and trailing >
-			record.sequence = chomp(strings.Replace(split_result[1], "\n", "", -1), ">")
-		}
+	err := sc.Error()
+	if err != nil {
+		log.Fatal("failed during reading: %v", err)
 	}
-	return record, err
-}
-
-//remove last char in a string if that char is the delim
-func chomp(s string, delim string) string {
-	if s[len(s)-1] == delim[0] {
-		return s[0 : len(s)-1]
-	}
-	return s
+	return result
 }
