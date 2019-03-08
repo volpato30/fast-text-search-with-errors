@@ -117,9 +117,9 @@ func main() {
 	test_hamming1_search()
 	fmt.Println("test passed")
 	config := Configuration{
-		denovoPeptideFilename: "denovo.peptide",
-		fastaFileName:         "MOUSE.fasta",
-		outputFileName:        "wt_aligned.peptide.txt",
+		denovoPeptideFilename: "./peptide1.txt",
+		fastaFileName:         "wild_type_match/fasta_files/HUMAN.fasta",
+		outputFileName:        "wild_type_match/MSV000097215/wt_aligned.peptide.txt",
 		batchSize:             200,
 	}
 	start := time.Now()
@@ -151,6 +151,11 @@ func main() {
 			denovoPeptides = []string{}
 		}
 	}
+
+	wg.Add(1)
+	go batchProcess(denovoPeptides, databasePeptides, writer, &mutex, &wg)
+	fmt.Println("start a goroutine")
+	denovoPeptides = []string{}
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
